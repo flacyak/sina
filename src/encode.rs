@@ -1,13 +1,14 @@
+use crate::mode::{EC, mode_details};
 use encoding_rs::SHIFT_JIS;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Encoding {
     Num,
     Alphanum,
     Byte,
     Kanji, // only kanji
 }
-pub fn smallest_encode(s: String) -> Encoding {
+fn smallest_encode(s: &String) -> Encoding {
     let mut current = Encoding::Num;
 
     for c in s.chars() {
@@ -74,6 +75,21 @@ fn is_jis_encoding(bytes: &[u8]) -> bool {
     }
     true
 }
+pub fn encode(s: String, size: &'static str) -> String {
+    let enc: Encoding = smallest_encode(&s);
+    let mut ec: EC = EC::L;
+
+    match size {
+        "l" => ec = EC::L,
+        "m" => ec = EC::M,
+        "h" => ec = EC::H,
+        "q" => ec = EC::Q,
+        _ => ec = EC::L,
+    }
+
+    let (mode, cnt, data) = mode_details(enc, ec);
+    s
+}
 
 #[cfg(test)]
 mod tests {
@@ -88,7 +104,7 @@ mod tests {
             ("こんにちは", Encoding::Kanji),
         ];
         for (url, encoding) in &queries {
-            assert_eq!(smallest_encode(url.to_string()), *encoding);
+            assert_eq!(smallest_encode(&url.to_string()), *encoding);
         }
     }
 }

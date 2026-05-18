@@ -1,14 +1,18 @@
-mod encode;
-pub use encode::Encoding;
+pub use crate::encode::Encoding;
 
-enum EC {
+#[derive(PartialEq, Debug, Copy, Clone)]
+pub enum EC {
     L,
     M,
     Q,
     H,
 }
 
-pub fn num_mode(ec: EC, enc: Encoding) -> u32 {
+pub fn mode_details(enc: Encoding, ec: EC) -> (u8, &'static str, u8) {
+    (num_mode(ec, enc), mode_indicator(enc), num_bits(enc))
+}
+
+fn num_mode(ec: EC, enc: Encoding) -> u8 {
     match (ec, enc) {
         (EC::L, Encoding::Num) => 187,
         (EC::L, Encoding::Alphanum) => 114,
@@ -26,7 +30,23 @@ pub fn num_mode(ec: EC, enc: Encoding) -> u32 {
         (EC::H, Encoding::Alphanum) => 50,
         (EC::H, Encoding::Byte) => 34,
         (EC::H, Encoding::Kanji) => 21,
-        (_, _) => 0,
     }
 }
 
+fn mode_indicator(enc: Encoding) -> &'static str {
+    match enc {
+        Encoding::Num => "0001",
+        Encoding::Alphanum => "0010",
+        Encoding::Byte => "0100",
+        Encoding::Kanji => "1000",
+    }
+}
+
+fn num_bits(enc: Encoding) -> u8 {
+    match enc {
+        Encoding::Num => 10,
+        Encoding::Alphanum => 9,
+        Encoding::Byte => 8,
+        Encoding::Kanji => 8,
+    }
+}

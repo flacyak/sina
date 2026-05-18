@@ -1,5 +1,6 @@
 mod encode;
-pub use encode::{Encoding, smallest_encode};
+mod mode;
+pub use encode::{Encoding, encode};
 use std::env;
 
 struct Base {
@@ -15,8 +16,9 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let query: &String = &args[1];
-    let url_str: &String = &args[2];
-    let base_type: Encoding = smallest_encode(url_str.to_string());
+    let size: &'static str = &args[2];
+    let url_str: &String = &args[3];
+    let encode_str: String = encode(url_str.to_string(), size);
     match query.as_str() {
         "gen" => {}
         _ => read_error(),
