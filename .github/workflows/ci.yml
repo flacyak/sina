@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Format, lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  visual:
+    name: Visual test in a real terminal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install terminal, screenshot and decoder tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xterm imagemagick fonts-dejavu-core
+          pip install zxing-cpp pillow
+      - run: cargo build --release
+      - run: xvfb-run -a -s "-screen 0 1280x1024x24" python3 scripts/visual_test.py target/release/sina
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terminal-screenshots
+          path: visual-screenshots/
+
+  publish-dry-run:
+    name: Verify the crate is publishable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo publish --dry-run
