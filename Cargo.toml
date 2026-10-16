@@ -2,6 +2,16 @@
 name = "sina"
 version = "0.1.0"
 edition = "2024"
+description = "Generate a QR code from the command line and display it in the terminal"
+license = "MIT"
+repository = "https://github.com/flacyak/sina"
+readme = "README.md"
+keywords = ["qr", "qrcode", "cli", "terminal"]
+categories = ["command-line-utilities", "encoding"]
 
 [dependencies]
 encoding_rs = "0.8.35"
+
+[dev-dependencies]
+image = { version = "0.25", default-features = false }
+rqrr = "0.11"
