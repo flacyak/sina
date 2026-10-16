@@ -91,8 +91,8 @@ fn encode_payload(text: &str, mode: Encoding) -> BitBuf {
         }
         Encoding::Kanji => {
             let (bytes, _, _) = SHIFT_JIS.encode(text);
-            for pair in bytes.chunks_exact(2) {
-                let word = u16::from_be_bytes([pair[0], pair[1]]);
+            for &pair in bytes.as_chunks::<2>().0 {
+                let word = u16::from_be_bytes(pair);
                 let offset = if word <= 0x9FFC { word - 0x8140 } else { word - 0xC140 };
                 bits.push(u32::from((offset >> 8) * 0xC0 + (offset & 0xFF)), 13);
             }
